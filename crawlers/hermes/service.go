@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"time"
 )
 
@@ -16,7 +17,7 @@ var defaultHTTPClient = http.Client{
 }
 
 func CrawlGoods(ctx context.Context, query string) (*ProductResponse, error) {
-	req, _ := http.NewRequest("GET", searchBaseURL+query, nil)
+	req, _ := http.NewRequest("GET", searchBaseURL+url.QueryEscape(query), nil)
 	req = req.WithContext(ctx)
 	response, err := defaultHTTPClient.Do(req)
 	if err != nil {
