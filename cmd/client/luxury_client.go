@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"runtime"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -43,11 +44,14 @@ func main() {
 			continue
 		}
 		if response.Total > 0 {
+			wg := sync.WaitGroup{}
 			urls := make([]string, 0, int(response.Total))
 			for i := 0; i < int(response.Total) && i < len(response.Products); i++ {
 				url := response.Products[i].GetDetailURL()
 				cmd := default_web_navigator.OpenURL(runtime.GOOS, url)
+				wg.Add(1)
 				go func() {
+					defer wg.Done()
 					err := cmd.Run()
 					if err != nil {
 						sugar.Errorw("run cmd error", "err", err.Error())
@@ -56,6 +60,7 @@ func main() {
 				urls = append(urls, url)
 			}
 			sugar.Infow(query+" 有货了！", "count", response.Total, "urls", urls)
+			wg.Wait()
 			return
 		}
 	}
