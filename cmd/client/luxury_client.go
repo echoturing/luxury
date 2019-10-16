@@ -47,7 +47,8 @@ func main() {
 			wg := sync.WaitGroup{}
 			urls := make([]string, 0, int(response.Total))
 			for i := 0; i < int(response.Total) && i < len(response.Products); i++ {
-				url := response.Products[i].GetDetailURL()
+				product := response.Products[i]
+				url := product.GetDetailURL()
 				cmd := default_web_navigator.OpenURL(runtime.GOOS, url)
 				wg.Add(1)
 				go func() {
@@ -57,6 +58,11 @@ func main() {
 						sugar.Errorw("run cmd error", "err", err.Error())
 					}
 				}()
+				sugar.Infow("now open",
+					"title", product.Title,
+					"url", url,
+					"sku", product.SKU,
+				)
 				urls = append(urls, url)
 			}
 			sugar.Infow(query+" 有货了！", "count", response.Total, "urls", urls)
